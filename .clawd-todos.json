@@ -1,0 +1,17 @@
+[
+  {
+    "content": "Analyze the grammatical structure of each sentence",
+    "activeForm": "analyze",
+    "status": "in_progress"
+  },
+  {
+    "content": "Translate to Chinese preserving grammatical complexity",
+    "activeForm": "translate",
+    "status": "pending"
+  },
+  {
+    "content": "Verify translation maintains ambiguity and meaning",
+    "activeForm": "verify",
+    "status": "pending"
+  }
+]

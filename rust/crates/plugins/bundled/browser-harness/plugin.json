@@ -1,0 +1,10 @@
+{
+  "name": "browser-harness",
+  "version": "1.0.0",
+  "description": "Browser automation CLI tool — open pages, click, type, screenshot, extract content from anti-scraping sites. Provides the /browser-harness skill for AI-driven browser control.",
+  "defaultEnabled": true,
+  "skills": [
+    "skills/SKILL.md",
+    "skills/browser-harness-use.md"
+  ]
+}
