@@ -4,37 +4,47 @@
 
 ## 与原项目的差异
 
-对比基准：`upstream/main` vs 本仓库当前 `main`
+对比基准：[ultraworkers/claw-code](https://github.com/ultraworkers/claw-code) `main` vs 本仓库 `main`（仅 `rust/` 目录）
 
 | 指标 | 数值 |
 |------|------|
-| 变更文件总数 | **502** |
-| 新增文件 | **143** |
-| 删除文件 | **282** |
-| 修改文件 | **76** |
-| 新增行数 | **+47,478** |
-| 删除行数 | **-88,395** |
+| 变更文件总数 | **202** |
+| 新增文件 | **53** |
+| 删除文件 | **76** |
+| 修改文件 | **72** |
+| 新增行数 | **+27,509** |
+| 删除行数 | **-47,844** |
 
-### 主要变更领域
+### Crate 结构变化
 
-| 目录 | 变更文件数 | 说明 |
-|------|----------|------|
-| `rust/crates/runtime` | 50 | 核心引擎重构（session、bash、permissions、MCP） |
-| `rust/crates/rusty-claude-cli` | 20 | CLI 入口、终端渲染、交互优化 |
-| `rust/crates/agents` | 15 | Sub-agent 生命周期管理 |
-| `rust/crates/api` | 15 | LLM HTTP 客户端、SSE、Provider 路由 |
-| `rust/crates/plugins` | 12 | 插件加载、marketplace、配置集成 |
-| `src/` | 100 | 移除原项目 Python 参考实现 |
-| `docs/` | 26 | 移除原项目文档（替换为本仓库 README） |
-| `.claude/` | 84 | 新增 Agent 定义、Skills、插件配置 |
+| 变化 | Crate | 说明 |
+|------|-------|------|
+| 新增 | `agents` | Sub-agent 生命周期管理（spawn、manifest、状态机） |
+| 新增 | `plugin-types` | 插件类型定义（config、lifecycle、MCP 接口） |
+| 移除 | `claw-analog` | 原项目模拟服务（本项目不需要） |
+| 移除 | `claw-rag-service` | 原项目 RAG 服务（本项目不需要） |
+
+### 各 Crate 变更统计
+
+| Crate | 变更文件数 | 主要改动 |
+|-------|----------|----------|
+| `runtime` | 50 | 核心引擎重构（session、bash、permissions、MCP、sandbox） |
+| `rusty-claude-cli` | 20 | CLI 入口、终端渲染、交互优化、模型选择 |
+| `agents` | 15 | 全新 crate：sub-agent spawn/discovery/persist |
+| `api` | 15 | LLM HTTP 客户端、SSE 解析、Provider 路由 |
+| `plugins` | 12 | 插件加载、marketplace、配置集成 |
+| `commands` | 6 | slash commands 重构 |
+| `tools` | 6 | 工具执行门面层调整 |
+| `plugin-types` | 5 | 全新 crate：插件接口类型 |
 
 ### 关键改动
 
-- **移除 Python 参考实现**（`src/` + `tests/`）— 本项目为纯 Rust 实现
-- **新增 Windows 原生支持** — `start.bat`、`start.sh`、MSVC 编译环境集成
-- **新增 Agent/Skill 生态** — 50+ 预置 Agent 定义、20+ Skill 模板
+- **新增 Windows 原生支持** — `start.bat`、`start.sh`、MSVC/Clang-CL 编译环境集成
+- **新增 `agents` crate** — sub-agent 生命周期管理（Created → Running → Completed/Failed）
+- **新增 `plugin-types` crate** — 插件系统类型定义与接口规范
 - **运行时重构** — session 持久化、权限系统、MCP 生命周期管理、沙箱检测
 - **Mock 服务改为纯库** — 不生成独立 exe，仅供集成测试使用
+- **Lint 策略调整** — `pedantic` 从 `allow` 提升为 `warn`，`unsafe_code` 从 `forbid` 改为 `deny`
 
 Windows-native AI coding assistant CLI written in Rust. Binary name: `claw`.
 
