@@ -1,8 +1,8 @@
 # Claw Code
 
-> **Fork 说明：** 本项目基于 [ultraworkers/claw-code](https://github.com/ultraworkers/claw-code) 深度修改，针对 Windows 平台进行了全面适配和优化，已实现 Windows 上的稳定运行。
+> **Fork 说明：** 本项目基于 [ultraworkers/claw-code](https://github.com/ultraworkers/claw-code) 深度修改，源码可编译为三端通用（Windows / macOS / Linux），作者恰好在 Windows 上使用，因此针对 Windows 平台进行了重点适配和优化。
 
-Windows-native AI coding assistant CLI written in Rust. Binary name: `claw`.
+Cross-platform AI coding assistant CLI written in Rust. Binary name: `claw`.
 
 Provides an interactive REPL that communicates with LLM providers (Anthropic, OpenAI-compatible) and exposes tools for file editing, bash execution, sub-agents, MCP servers, plugins, and slash commands.
 
@@ -16,7 +16,7 @@ Provides an interactive REPL that communicates with LLM providers (Anthropic, Op
 |------|------|
 | **代码规模** | 新增 **27,509** 行，删除 **47,844** 行，重构 **202** 个文件 |
 | **全新架构** | 新增 `agents` + `plugin-types` 两个 crate，重新设计 sub-agent 生命周期与插件接口 |
-| **Windows 原生** | MSVC/Clang-CL 编译链、`start.bat` / `start.sh` 一键启动、PowerShell 全兼容 |
+| **三端通用** | 源码可编译 Windows / macOS / Linux，预编译包提供 Windows x64 |
 | **运行时重构** | session 持久化、规则权限引擎、MCP 全生命周期管理、沙箱检测 |
 | **精简瘦身** | 移除 Python 参考实现、RAG 服务、模拟服务等 76 个冗余文件 |
 | **Agent 生态** | 50+ 预置 Agent 定义、20+ Skill 模板、插件市场集成 |
