@@ -2,9 +2,28 @@
 
 > **Fork 说明：** 本项目基于 [ultraworkers/claw-code](https://github.com/ultraworkers/claw-code) 深度修改，针对 Windows 平台进行了全面适配和优化，已实现 Windows 上的稳定运行。
 
-## 与原项目的差异
+Windows-native AI coding assistant CLI written in Rust. Binary name: `claw`.
 
-对比基准：[ultraworkers/claw-code](https://github.com/ultraworkers/claw-code) `main` vs 本仓库 `main`（仅 `rust/` 目录）
+Provides an interactive REPL that communicates with LLM providers (Anthropic, OpenAI-compatible) and exposes tools for file editing, bash execution, sub-agents, MCP servers, plugins, and slash commands.
+
+![Claw Code Terminal](terminal.png)
+
+## Remastered Edition
+
+这不是简单的 fork，而是对原项目的**深度重置**。原项目自述为 *"museum exhibit"*（博物馆展品），本项目将其改造为**可在 Windows 上稳定运行的生产级工具**。
+
+| 亮点 | 详情 |
+|------|------|
+| **代码规模** | 新增 **27,509** 行，删除 **47,844** 行，重构 **202** 个文件 |
+| **全新架构** | 新增 `agents` + `plugin-types` 两个 crate，重新设计 sub-agent 生命周期与插件接口 |
+| **Windows 原生** | MSVC/Clang-CL 编译链、`start.bat` / `start.sh` 一键启动、PowerShell 全兼容 |
+| **运行时重构** | session 持久化、规则权限引擎、MCP 全生命周期管理、沙箱检测 |
+| **精简瘦身** | 移除 Python 参考实现、RAG 服务、模拟服务等 76 个冗余文件 |
+| **Agent 生态** | 50+ 预置 Agent 定义、20+ Skill 模板、插件市场集成 |
+| **代码质量** | `clippy::pedantic` 全量警告、`unsafe_code` deny、完整测试套件 |
+
+<details>
+<summary>📊 详细变更统计（仅 <code>rust/</code> 目录）</summary>
 
 | 指标 | 数值 |
 |------|------|
@@ -15,7 +34,7 @@
 | 新增行数 | **+27,509** |
 | 删除行数 | **-47,844** |
 
-### Crate 结构变化
+**Crate 结构变化：**
 
 | 变化 | Crate | 说明 |
 |------|-------|------|
@@ -24,33 +43,20 @@
 | 移除 | `claw-analog` | 原项目模拟服务（本项目不需要） |
 | 移除 | `claw-rag-service` | 原项目 RAG 服务（本项目不需要） |
 
-### 各 Crate 变更统计
+**各 Crate 变更：**
 
 | Crate | 变更文件数 | 主要改动 |
 |-------|----------|----------|
-| `runtime` | 50 | 核心引擎重构（session、bash、permissions、MCP、sandbox） |
-| `rusty-claude-cli` | 20 | CLI 入口、终端渲染、交互优化、模型选择 |
-| `agents` | 15 | 全新 crate：sub-agent spawn/discovery/persist |
-| `api` | 15 | LLM HTTP 客户端、SSE 解析、Provider 路由 |
+| `runtime` | 50 | session、bash、permissions、MCP、sandbox |
+| `rusty-claude-cli` | 20 | CLI 入口、终端渲染、交互优化 |
+| `agents` | 15 | 全新 crate：spawn/discovery/persist |
+| `api` | 15 | LLM HTTP 客户端、SSE、Provider 路由 |
 | `plugins` | 12 | 插件加载、marketplace、配置集成 |
 | `commands` | 6 | slash commands 重构 |
-| `tools` | 6 | 工具执行门面层调整 |
+| `tools` | 6 | 工具执行门面层 |
 | `plugin-types` | 5 | 全新 crate：插件接口类型 |
 
-### 关键改动
-
-- **新增 Windows 原生支持** — `start.bat`、`start.sh`、MSVC/Clang-CL 编译环境集成
-- **新增 `agents` crate** — sub-agent 生命周期管理（Created → Running → Completed/Failed）
-- **新增 `plugin-types` crate** — 插件系统类型定义与接口规范
-- **运行时重构** — session 持久化、权限系统、MCP 生命周期管理、沙箱检测
-- **Mock 服务改为纯库** — 不生成独立 exe，仅供集成测试使用
-- **Lint 策略调整** — `pedantic` 从 `allow` 提升为 `warn`，`unsafe_code` 从 `forbid` 改为 `deny`
-
-Windows-native AI coding assistant CLI written in Rust. Binary name: `claw`.
-
-Provides an interactive REPL that communicates with LLM providers (Anthropic, OpenAI-compatible) and exposes tools for file editing, bash execution, sub-agents, MCP servers, plugins, and slash commands.
-
-![Claw Code Terminal](terminal.png)
+</details>
 
 ## Features
 
