@@ -2,6 +2,40 @@
 
 > **Fork 说明：** 本项目基于 [ultraworkers/claw-code](https://github.com/ultraworkers/claw-code) 深度修改，针对 Windows 平台进行了全面适配和优化，已实现 Windows 上的稳定运行。
 
+## 与原项目的差异
+
+对比基准：`upstream/main` vs 本仓库当前 `main`
+
+| 指标 | 数值 |
+|------|------|
+| 变更文件总数 | **502** |
+| 新增文件 | **143** |
+| 删除文件 | **282** |
+| 修改文件 | **76** |
+| 新增行数 | **+47,478** |
+| 删除行数 | **-88,395** |
+
+### 主要变更领域
+
+| 目录 | 变更文件数 | 说明 |
+|------|----------|------|
+| `rust/crates/runtime` | 50 | 核心引擎重构（session、bash、permissions、MCP） |
+| `rust/crates/rusty-claude-cli` | 20 | CLI 入口、终端渲染、交互优化 |
+| `rust/crates/agents` | 15 | Sub-agent 生命周期管理 |
+| `rust/crates/api` | 15 | LLM HTTP 客户端、SSE、Provider 路由 |
+| `rust/crates/plugins` | 12 | 插件加载、marketplace、配置集成 |
+| `src/` | 100 | 移除原项目 Python 参考实现 |
+| `docs/` | 26 | 移除原项目文档（替换为本仓库 README） |
+| `.claude/` | 84 | 新增 Agent 定义、Skills、插件配置 |
+
+### 关键改动
+
+- **移除 Python 参考实现**（`src/` + `tests/`）— 本项目为纯 Rust 实现
+- **新增 Windows 原生支持** — `start.bat`、`start.sh`、MSVC 编译环境集成
+- **新增 Agent/Skill 生态** — 50+ 预置 Agent 定义、20+ Skill 模板
+- **运行时重构** — session 持久化、权限系统、MCP 生命周期管理、沙箱检测
+- **Mock 服务改为纯库** — 不生成独立 exe，仅供集成测试使用
+
 Windows-native AI coding assistant CLI written in Rust. Binary name: `claw`.
 
 Provides an interactive REPL that communicates with LLM providers (Anthropic, OpenAI-compatible) and exposes tools for file editing, bash execution, sub-agents, MCP servers, plugins, and slash commands.
