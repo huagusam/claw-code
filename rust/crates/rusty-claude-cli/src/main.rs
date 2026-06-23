@@ -9986,7 +9986,7 @@ mod tests {
     use std::process::Command;
     use std::sync::{Mutex, MutexGuard, OnceLock};
     use std::thread;
-    use std::time::{Duration, SystemTime, UNIX_EPOCH};
+    use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
     use tools::GlobalToolRegistry;
 
     fn registry_with_plugin_tool() -> GlobalToolRegistry {
@@ -11627,6 +11627,7 @@ mod tests {
                     is_error: false,
                 }],
                 usage: None,
+                created_at: Instant::now(),
                 cached_tokens: OnceLock::new(),
                 cached_input_message: OnceLock::new(),
             },
@@ -11670,6 +11671,7 @@ mod tests {
                 is_error: true,
             }],
             usage: None,
+            created_at: Instant::now(),
             cached_tokens: OnceLock::new(),
             cached_input_message: OnceLock::new(),
         }];
@@ -13031,6 +13033,7 @@ UU conflicted.rs",
                     is_error: false,
                 }],
                 usage: None,
+                created_at: Instant::now(),
                 cached_tokens: OnceLock::new(),
                 cached_input_message: OnceLock::new(),
             },

@@ -5,7 +5,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::OnceLock;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 use base64::Engine;
 use crate::image_cache::ImageCache;
@@ -75,6 +75,9 @@ pub struct ConversationMessage {
     pub role: MessageRole,
     pub blocks: Vec<ContentBlock>,
     pub usage: Option<TokenUsage>,
+    /// In-memory timestamp for time-based context filtering (not persisted).
+    /// Used by `context.rs` to expire WebSearch/WebFetch results after a TTL.
+    pub created_at: Instant,
     /// Populated on first call to `estimate_message_tokens`. Messages are
     /// append-only within a session, so this cache is never invalidated.
     /// Serialisation skips this field (it is derived from content).
@@ -797,6 +800,7 @@ impl ConversationMessage {
             role: MessageRole::User,
             blocks: vec![ContentBlock::Text { text: text.into() }],
             usage: None,
+            created_at: Instant::now(),
             cached_tokens: OnceLock::new(),
             cached_input_message: OnceLock::new(),
         }
@@ -808,6 +812,7 @@ impl ConversationMessage {
             role: MessageRole::User,
             blocks,
             usage: None,
+            created_at: Instant::now(),
             cached_tokens: OnceLock::new(),
             cached_input_message: OnceLock::new(),
         }
@@ -819,6 +824,7 @@ impl ConversationMessage {
             role: MessageRole::Assistant,
             blocks,
             usage: None,
+            created_at: Instant::now(),
             cached_tokens: OnceLock::new(),
             cached_input_message: OnceLock::new(),
         }
@@ -830,6 +836,7 @@ impl ConversationMessage {
             role: MessageRole::Assistant,
             blocks,
             usage,
+            created_at: Instant::now(),
             cached_tokens: OnceLock::new(),
             cached_input_message: OnceLock::new(),
         }
@@ -851,6 +858,7 @@ impl ConversationMessage {
                 is_error,
             }],
             usage: None,
+            created_at: Instant::now(),
             cached_tokens: OnceLock::new(),
             cached_input_message: OnceLock::new(),
         }
@@ -912,6 +920,7 @@ impl ConversationMessage {
             role,
             blocks,
             usage,
+            created_at: Instant::now(),
             cached_tokens: OnceLock::new(),
             cached_input_message: OnceLock::new(),
         })
@@ -1271,6 +1280,7 @@ fn filter_toolresult_for_persist(message: &ConversationMessage) -> ConversationM
         role: message.role,
         blocks,
         usage: message.usage.clone(),
+        created_at: message.created_at,
         cached_tokens: message.cached_tokens.clone(),
         cached_input_message: OnceLock::new(),
     }

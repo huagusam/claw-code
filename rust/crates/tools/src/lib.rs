@@ -80,8 +80,8 @@ fn global_webfetch_cache() -> &'static std::sync::Mutex<std::collections::HashMa
     CACHE.get_or_init(|| std::sync::Mutex::new(std::collections::HashMap::new()))
 }
 
-/// Cache TTL: 5 minutes (web content rarely changes within this window).
-const WEBFETCH_CACHE_TTL_SECS: u64 = 300;
+/// Cache TTL: 2.5 minutes (aligned with context window TTL for WebFetch).
+const WEBFETCH_CACHE_TTL_SECS: u64 = 150;
 
 /// File content cache. Stores file contents written by new_file/edit_file
 /// so that subsequent read_file calls can skip disk I/O.

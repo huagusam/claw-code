@@ -1,4 +1,5 @@
 use std::sync::OnceLock;
+use std::time::Instant;
 use tiktoken_rs::CoreBPE;
 
 use crate::session::{ContentBlock, ConversationMessage, MessageRole, Session};
@@ -293,6 +294,7 @@ pub fn compact_session(session: &Session, config: CompactionConfig) -> Compactio
         role: MessageRole::System,
         blocks: vec![ContentBlock::Text { text: continuation }],
         usage: None,
+        created_at: Instant::now(),
         cached_tokens: OnceLock::new(),
         cached_input_message: OnceLock::new(),
     }];
@@ -777,8 +779,9 @@ mod tests {
         collect_key_files, compact_session, find_turn_tail_start, format_compact_summary,
         get_compact_continuation_message, infer_pending_work, should_compact, CompactionConfig,
     };
-use crate::session::{ContentBlock, ConversationMessage, MessageRole, Session};
-use std::sync::OnceLock;
+    use crate::session::{ContentBlock, ConversationMessage, MessageRole, Session};
+    use std::sync::OnceLock;
+    use std::time::Instant;
 
     #[test]
     fn formats_compact_summary_like_upstream() {
@@ -813,6 +816,7 @@ use std::sync::OnceLock;
                     text: "recent".to_string(),
                 }],
                 usage: None,
+                created_at: Instant::now(),
                 cached_tokens: OnceLock::new(),
                 cached_input_message: OnceLock::new(),
             },
@@ -933,6 +937,7 @@ use std::sync::OnceLock;
                     text: get_compact_continuation_message(summary, true, true),
                 }],
                 usage: None,
+                created_at: Instant::now(),
                 cached_tokens: OnceLock::new(),
                 cached_input_message: OnceLock::new(),
             },

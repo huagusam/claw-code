@@ -6,6 +6,7 @@
 //! - Truncates messages that exceed context window
 
 use std::sync::OnceLock;
+use std::time::Instant;
 
 use crate::session::{ContentBlock, ConversationMessage, MessageRole};
 
@@ -20,6 +21,21 @@ const PRESERVE_RECENT_MESSAGES: usize = 6;
 const FILTER_TOOLS: &[&str] = &[
     "WebFetch", "WebSearch", "read_file", "new_file", "edit_file", "bash", "grep_search",
 ];
+
+/// WebSearch results expire after 30 seconds.
+const WEBSEARCH_TTL_SECS: u64 = 30;
+/// WebFetch results expire after 2.5 minutes.
+const WEBFETCH_TTL_SECS: u64 = 150;
+
+/// Check whether a time-sensitive tool result has exceeded its TTL.
+fn tool_result_expired(tool_name: &str, created_at: Instant) -> bool {
+    let ttl = match tool_name {
+        "WebSearch" => WEBSEARCH_TTL_SECS,
+        "WebFetch" => WEBFETCH_TTL_SECS,
+        _ => return false,
+    };
+    created_at.elapsed().as_secs() >= ttl
+}
 
 /// Filters conversation messages for LLM API requests.
 ///
@@ -60,10 +76,11 @@ fn filter_for_api_inner(
                         tool_name,
                         output,
                         is_error,
-                    } if !is_recent
-                        && !is_error
+                    } if !is_error
                         && output.len() > TOOLRESULT_MIN_BYTES
-                        && FILTER_TOOLS.contains(&tool_name.as_str()) =>
+                        && FILTER_TOOLS.contains(&tool_name.as_str())
+                        && (!is_recent
+                            || tool_result_expired(tool_name, msg.created_at)) =>
                     {
                         // Generate structured summary preserving key metadata.
                         let summary = summarize_tool_result(tool_name, output);
@@ -98,6 +115,7 @@ fn filter_for_api_inner(
                 role: msg.role,
                 blocks: filtered_blocks,
                 usage: msg.usage.clone(),
+                created_at: msg.created_at,
                 cached_tokens: msg.cached_tokens.clone(),
                 cached_input_message: OnceLock::new(),
             })
@@ -279,6 +297,7 @@ mod tests {
                 make_thinking_block("Long thinking content...", Some("sig123")),
             ],
             usage: None,
+            created_at: Instant::now(),
             cached_tokens: OnceLock::new(),
             cached_input_message: OnceLock::new(),
         };
@@ -314,6 +333,7 @@ mod tests {
                 },
             ],
             usage: None,
+            created_at: Instant::now(),
             cached_tokens: OnceLock::new(),
             cached_input_message: OnceLock::new(),
         };
@@ -335,6 +355,7 @@ mod tests {
                 is_error: false,
             }],
             usage: None,
+            created_at: Instant::now(),
             cached_tokens: OnceLock::new(),
             cached_input_message: OnceLock::new(),
         };
@@ -366,6 +387,7 @@ mod tests {
                 is_error: false,
             }],
             usage: None,
+            created_at: Instant::now(),
             cached_tokens: OnceLock::new(),
             cached_input_message: OnceLock::new(),
         };
@@ -391,6 +413,7 @@ mod tests {
                 is_error: true,
             }],
             usage: None,
+            created_at: Instant::now(),
             cached_tokens: OnceLock::new(),
             cached_input_message: OnceLock::new(),
         };
@@ -414,6 +437,7 @@ mod tests {
                 is_error: false,
             }],
             usage: None,
+            created_at: Instant::now(),
             cached_tokens: OnceLock::new(),
             cached_input_message: OnceLock::new(),
         };
@@ -463,6 +487,7 @@ mod tests {
             role: MessageRole::Assistant,
             blocks: vec![make_thinking_block("some reasoning...", Some("sig_abc"))],
             usage: None,
+            created_at: Instant::now(),
             cached_tokens: OnceLock::new(),
             cached_input_message: OnceLock::new(),
         };
@@ -487,6 +512,7 @@ mod tests {
                 make_thinking_block("thinking...", Some("sig1")),
             ],
             usage: None,
+            created_at: Instant::now(),
             cached_tokens: OnceLock::new(),
             cached_input_message: OnceLock::new(),
         };
@@ -522,6 +548,7 @@ mod tests {
                 is_error: false,
             }],
             usage: None,
+            created_at: Instant::now(),
             cached_tokens: OnceLock::new(),
             cached_input_message: OnceLock::new(),
         };
@@ -536,6 +563,120 @@ mod tests {
             assert!(output.contains("bing"), "got: {output}");
             assert!(output.contains("10 results"), "got: {output}");
             assert!(output.len() < 200, "summary should be short, got {} chars", output.len());
+        } else {
+            panic!("Expected ToolResult");
+        }
+    }
+
+    /// Helper: build a large WebSearch JSON output (>500 bytes).
+    fn large_websearch_output() -> String {
+        serde_json::json!({
+            "query": "rust async runtime",
+            "provider": "bing",
+            "totalResults": 1234567,
+            "resultsReturned": 10,
+            "results": [
+                {"title": "Tokio", "link": "https://tokio.rs", "snippet": "Tokio is an asynchronous runtime for the Rust programming language that provides the building blocks needed for writing network applications.", "source": "tokio.rs", "date": "2024-01-15"},
+                {"title": "Async book", "link": "https://rust-lang.github.io/async-book/", "snippet": "This book aims to be a thorough guide to asynchronous programming in Rust, covering everything from basic concepts to advanced patterns.", "source": "rust-lang.github.io", "date": "2024-02-20"},
+            ]
+        })
+        .to_string()
+    }
+
+    #[test]
+    fn websearch_expires_after_30s() {
+        let output = large_websearch_output();
+        assert!(output.len() > 500);
+
+        let msg = ConversationMessage {
+            role: MessageRole::Tool,
+            blocks: vec![ContentBlock::ToolResult {
+                tool_use_id: "tu_ws".to_string(),
+                tool_name: "WebSearch".to_string(),
+                output,
+                is_error: false,
+            }],
+            usage: None,
+            // Simulate 31 seconds ago
+            created_at: Instant::now() - std::time::Duration::from_secs(31),
+            cached_tokens: OnceLock::new(),
+            cached_input_message: OnceLock::new(),
+        };
+
+        // Even within the recent window (preserve_recent=10), TTL should trigger compression
+        let filtered = filter_for_api_inner(&[msg], 10);
+        if let ContentBlock::ToolResult { output, .. } = &filtered[0].blocks[0] {
+            assert!(
+                output.starts_with("[WebSearch:"),
+                "expired WebSearch should be compressed, got: {output}"
+            );
+        } else {
+            panic!("Expected ToolResult");
+        }
+    }
+
+    #[test]
+    fn webfetch_expires_after_150s() {
+        let output = serde_json::json!({
+            "url": "https://example.com",
+            "content": "X".repeat(600)
+        })
+        .to_string();
+        assert!(output.len() > 500);
+
+        let msg = ConversationMessage {
+            role: MessageRole::Tool,
+            blocks: vec![ContentBlock::ToolResult {
+                tool_use_id: "tu_wf".to_string(),
+                tool_name: "WebFetch".to_string(),
+                output,
+                is_error: false,
+            }],
+            usage: None,
+            // Simulate 151 seconds ago
+            created_at: Instant::now() - std::time::Duration::from_secs(151),
+            cached_tokens: OnceLock::new(),
+            cached_input_message: OnceLock::new(),
+        };
+
+        let filtered = filter_for_api_inner(&[msg], 10);
+        if let ContentBlock::ToolResult { output, .. } = &filtered[0].blocks[0] {
+            assert!(
+                output.starts_with("[WebFetch:"),
+                "expired WebFetch should be compressed, got: {output}"
+            );
+        } else {
+            panic!("Expected ToolResult");
+        }
+    }
+
+    #[test]
+    fn recent_websearch_preserved_within_ttl() {
+        let output = large_websearch_output();
+        assert!(output.len() > 500);
+
+        let msg = ConversationMessage {
+            role: MessageRole::Tool,
+            blocks: vec![ContentBlock::ToolResult {
+                tool_use_id: "tu_ws_fresh".to_string(),
+                tool_name: "WebSearch".to_string(),
+                output,
+                is_error: false,
+            }],
+            usage: None,
+            // Created 5 seconds ago — well within 30s TTL
+            created_at: Instant::now() - std::time::Duration::from_secs(5),
+            cached_tokens: OnceLock::new(),
+            cached_input_message: OnceLock::new(),
+        };
+
+        // Within recent window AND within TTL → should be preserved
+        let filtered = filter_for_api_inner(&[msg], 10);
+        if let ContentBlock::ToolResult { output, .. } = &filtered[0].blocks[0] {
+            assert!(
+                output.contains("rust async runtime"),
+                "fresh WebSearch in recent window should be preserved, got: {output}"
+            );
         } else {
             panic!("Expected ToolResult");
         }
