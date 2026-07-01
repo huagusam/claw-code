@@ -1,60 +1,58 @@
-# Claw Code
+> **Fork Note:** This project is a deeply modified version based on [ultraworkers/claw-code](https://github.com/ultraworkers/claw-code). The source code can be compiled for cross-platform use (Windows / macOS / Linux). Since the author primarily uses Windows, this version focuses on optimization and adaptation specifically for that platform.
 
-> **Fork 说明：** 本项目基于 [ultraworkers/claw-code](https://github.com/ultraworkers/claw-code) 深度修改，源码可编译为三端通用（Windows / macOS / Linux），作者恰好在 Windows 上使用，因此针对 Windows 平台进行了重点适配和优化。
+A cross-platform AI coding assistant CLI written in Rust. Binary name: `claw`.
 
-Cross-platform AI coding assistant CLI written in Rust. Binary name: `claw`.
-
-Provides an interactive REPL that communicates with LLM providers (Anthropic, OpenAI-compatible) and exposes tools for file editing, bash execution, sub-agents, MCP servers, plugins, and slash commands.
+It provides an interactive REPL that communicates with LLM providers (including Anthropic and OpenAI-compatible services), along with tools for file editing, bash execution, sub-agents, MCP servers, plugins, and slash commands.
 
 ![Claw Code Terminal](terminal.png)
 
 ## Remastered Edition
 
-这不是简单的 fork，而是对原项目的**深度重置**。原项目自述为 *"museum exhibit"*（博物馆展品），本项目将其改造为**可在 Windows 上稳定运行的生产级工具**。
+This is not just a simple fork—it's a **complete overhaul** of the original project. Originally described as a *"museum exhibit"*, this version has been transformed into a **production-ready tool that runs stably on Windows**.
 
-| 亮点 | 详情 |
-|------|------|
-| **代码规模** | 新增 **27,509** 行，删除 **47,844** 行，重构 **202** 个文件 |
-| **全新架构** | 新增 `agents` + `plugin-types` 两个 crate，重新设计 sub-agent 生命周期与插件接口 |
-| **三端通用** | 源码可编译 Windows / macOS / Linux，预编译包提供 Windows x64 |
-| **运行时重构** | session 持久化、规则权限引擎、MCP 全生命周期管理、沙箱检测 |
-| **精简瘦身** | 移除 Python 参考实现、RAG 服务、模拟服务等 76 个冗余文件 |
-| **Agent 生态** | 50+ 预置 Agent 定义、20+ Skill 模板、插件市场集成 |
-| **代码质量** | `clippy::pedantic` 全量警告、`unsafe_code` deny、完整测试套件 |
+| Feature | Details |
+|--------|---------|
+| **Code Size** | +27,509 lines added, -47,844 lines removed, 202 files refactored |
+| **New Architecture** | Added `agents` and `plugin-types` crates; redesigned sub-agent lifecycle and plugin interfaces |
+| **Cross-Platform Support** | Source code compiles for Windows / macOS / Linux; precompiled packages available for Windows x64 |
+| **Runtime Improvements** | Session persistence, rule-based permission engine, full MCP lifecycle management, sandbox detection |
+| **Simplified Design** | Removed 76 redundant files including Python reference implementations, RAG services, and simulation services |
+| **Agent Ecosystem** | 50+ preconfigured agent definitions, 20+ Skill templates, plugin marketplace integration |
+| **Code Quality** | All warnings suppressed using `clippy::pedantic`, `unsafe_code` disabled, comprehensive test suite |
 
 <details>
-<summary>📊 详细变更统计（仅 <code>rust/</code> 目录）</summary>
+<summary>📊 Detailed change statistics (only <code>rust/</code> directory)</summary>
 
-| 指标 | 数值 |
-|------|------|
-| 变更文件总数 | **202** |
-| 新增文件 | **53** |
-| 删除文件 | **76** |
-| 修改文件 | **72** |
-| 新增行数 | **+27,509** |
-| 删除行数 | **-47,844** |
+| Metric | Value |
+|--------|-------|
+| Total files changed | **202** |
+| Files added | **53** |
+| Files removed | **76** |
+| Files modified | **72** |
+| Lines added | **+27,509** |
+| Lines removed | **-47,844** |
 
-**Crate 结构变化：**
+**Crate structure changes:**
 
-| 变化 | Crate | 说明 |
-|------|-------|------|
-| 新增 | `agents` | Sub-agent 生命周期管理（spawn、manifest、状态机） |
-| 新增 | `plugin-types` | 插件类型定义（config、lifecycle、MCP 接口） |
-| 移除 | `claw-analog` | 原项目模拟服务（本项目不需要） |
-| 移除 | `claw-rag-service` | 原项目 RAG 服务（本项目不需要） |
+| Change | Crate | Description |
+|--------|-------|-------------|
+| Added | `agents` | Manages sub-agent lifecycle (spawn, manifest, state machine) |
+| Added | `plugin-types` | Defines plugin types (config, lifecycle, MCP interfaces) |
+| Removed | `claw-analog` | Simulation service from original project (not needed here) |
+| Removed | `claw-rag-service` | RAG service from original project (not needed here) |
 
-**各 Crate 变更：**
+**Changes per Crate:**
 
-| Crate | 变更文件数 | 主要改动 |
-|-------|----------|----------|
-| `runtime` | 50 | session、bash、permissions、MCP、sandbox |
-| `rusty-claude-cli` | 20 | CLI 入口、终端渲染、交互优化 |
-| `agents` | 15 | 全新 crate：spawn/discovery/persist |
-| `api` | 15 | LLM HTTP 客户端、SSE、Provider 路由 |
-| `plugins` | 12 | 插件加载、marketplace、配置集成 |
-| `commands` | 6 | slash commands 重构 |
-| `tools` | 6 | 工具执行门面层 |
-| `plugin-types` | 5 | 全新 crate：插件接口类型 |
+| Crate | Number of changed files | Key modifications |
+|-------|--------------------------|--------------------|
+| `runtime` | 50 | Session management, bash execution, permissions system, MCP support, sandbox features |
+| `rusty-claude-cli` | 20 | CLI entry point, terminal rendering, interaction optimization |
+| `agents` | 15 | New crate for sub-agent functionality: spawning, discovery, persistence |
+| `api` | 15 | LLM HTTP client, SSE communication, Provider routing |
+| `plugins` | 12 | Plugin loading, marketplace integration, configuration management |
+| `commands` | 6 | Refactoring of slash commands |
+| `tools` | 6 | Unified interface for tool execution |
+| `plugin-types` | 5 | New crate defining plugin interface types |
 
 </details>
 

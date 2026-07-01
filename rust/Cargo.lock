@@ -10,7 +10,7 @@ checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
 
 [[package]]
 name = "agents"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "api",
  "futures",
@@ -81,7 +81,7 @@ checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
 
 [[package]]
 name = "api"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "criterion",
  "reqwest",
@@ -387,7 +387,7 @@ checksum = "c8d4a3bb8b1e0c1050499d1815f5ab16d04f0959b233085fb31653fbfc9d98f9"
 
 [[package]]
 name = "claw-code-plugin-types"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -410,7 +410,7 @@ checksum = "3d7b894f5411737b7867f4827955924d7c254fc9f4d91a6aad6b097804b1018b"
 
 [[package]]
 name = "commands"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "agents",
  "plugins",
@@ -420,7 +420,7 @@ dependencies = [
 
 [[package]]
 name = "compat-harness"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "commands",
  "runtime",
@@ -1549,7 +1549,7 @@ dependencies = [
 
 [[package]]
 name = "mock-anthropic-service"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "api",
  "serde_json",
@@ -1855,7 +1855,7 @@ dependencies = [
 
 [[package]]
 name = "plugins"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "claw-code-plugin-types",
  "serde",
@@ -2291,7 +2291,7 @@ dependencies = [
 
 [[package]]
 name = "runtime"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "base64 0.22.1",
  "claw-code-plugin-types",
@@ -2404,7 +2404,7 @@ checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 
 [[package]]
 name = "rusty-claude-cli"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "api",
  "base64 0.22.1",
@@ -2768,7 +2768,7 @@ dependencies = [
 
 [[package]]
 name = "telemetry"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -3000,7 +3000,7 @@ checksum = "5d99f8c9a7727884afe522e9bd5edbfc91a3312b36a77b5fb8926e4c31a41801"
 
 [[package]]
 name = "tools"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "agents",
  "api",
