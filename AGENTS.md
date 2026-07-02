@@ -146,7 +146,7 @@ Set by `start.bat` before launching `claw.exe`:
 | `TARGET_DIR` | Session storage: `.claw\sessions` |
 | `ANTHROPIC_BASE_URL` | API endpoint override (local proxy) |
 | `CLAW_WORKSPACE_POLICY` | `allow` — bypass workspace trust prompt |
-| `CLAUDE_CODE_SHELL` | Bash path for shell tool |
+| `CLAUDE_CODE_SHELL` | Shell path (used in startup scripts; hardcoded in binary) |
 | `RUST_LOG` | `info` level logging |
 | `DISABLE_TELEMETRY` | Disable telemetry |
 

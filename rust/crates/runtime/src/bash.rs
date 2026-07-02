@@ -448,7 +448,7 @@ fn prepare_command(
     }
 
     #[cfg(windows)]
-    let shell = r"H:\msys64\mingw64\bin\sh.exe";
+    let shell = r"C:\Program Files\Git\bin\sh.exe";
     #[cfg(unix)]
     let shell = "sh";
 
@@ -491,7 +491,7 @@ fn prepare_tokio_command(
     }
 
     #[cfg(windows)]
-    let shell = r"H:\msys64\mingw64\bin\sh.exe";
+    let shell = r"C:\Program Files\Git\bin\sh.exe";
     #[cfg(unix)]
     let shell = "sh";
     let mut prepared = TokioCommand::new(shell);

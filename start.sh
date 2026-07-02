@@ -48,7 +48,7 @@ export ANTHROPIC_BASE_URL="http://127.0.0.1:1234"
 export ANTHROPIC_API_KEY="sk-ant-your-key-here"
 
 # Shell configuration
-export CLAUDE_CODE_SHELL="H:/msys64/mingw64/bin/bash.exe"
+export CLAUDE_CODE_SHELL="C:/Program Files/Git/bin/sh.exe"
 export CLAUDE_CODE_USE_POWERSHELL_TOOL=1
 export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
 export DISABLE_TELEMETRY=1

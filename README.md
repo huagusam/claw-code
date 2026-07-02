@@ -236,7 +236,7 @@ User and project settings **deep merge**, with project-level keys overriding use
 | `ANTHROPIC_BASE_URL` | API endpoint override | `http://127.0.0.1:1234` |
 | `HTTPS_PROXY` | HTTP proxy | `http://127.0.0.1:7890` |
 | `CLAW_WORKSPACE_POLICY` | Workspace trust policy | `allow` |
-| `CLAUDE_CODE_SHELL` | Bash shell path | `C:\msys64\mingw64\bin\bash.exe` |
+| `CLAUDE_CODE_SHELL` | (Startup scripts only; unused by binary) | `C:\Program Files\Git\bin\sh.exe` |
 | `RUST_LOG` | Log level | `info` |
 | `DISABLE_TELEMETRY` | Disable telemetry | `1` |
 
