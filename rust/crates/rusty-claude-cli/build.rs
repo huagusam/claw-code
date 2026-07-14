@@ -64,11 +64,7 @@ fn main() {
         Ok(ico_path) => {
             // Re-embed whenever the SVG, the fallback, or the output path
             // changes.
-            println!("cargo:rerun-if-changed=assets/icon.svg");
             println!("cargo:rerun-if-changed=assets/fallback/claw-code.ico");
-            println!("cargo:rerun-if-changed=assets/fallback/16.png");
-            println!("cargo:rerun-if-changed=assets/fallback/32.png");
-            println!("cargo:rerun-if-changed=assets/fallback/48.png");
 
             // Only embed on Windows targets; the embed_resource crate is a
             // no-op elsewhere but we still avoid the work.
