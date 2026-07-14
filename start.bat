@@ -28,9 +28,7 @@ if exist "%PERL_EXE%" (
 )
 set ANTHROPIC_BASE_URL=http://127.0.0.1:1234
 set ANTHROPIC_API_KEY=sk-ant-your-key-here
-set DISABLE_TELEMETRY=1
 set CLAW_WORKSPACE_POLICY=allow
-set RUST_LOG=info
 set CLAW_BIN=rust\target\release\claw.exe
 "%CLAW_BIN%" %*
 pause

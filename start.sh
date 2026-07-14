@@ -48,9 +48,7 @@ export ANTHROPIC_BASE_URL="http://127.0.0.1:1234"
 export ANTHROPIC_API_KEY="sk-ant-your-key-here"
 
 # Shell configuration
-export DISABLE_TELEMETRY=1
 export CLAW_WORKSPACE_POLICY=allow
-export RUST_LOG=info
 
 # Binary path
 CLAW_BIN="rust/target/release/claw.exe"

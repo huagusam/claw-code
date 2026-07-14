@@ -189,8 +189,8 @@ SEARCHAPI_API_KEY=your-key
 HTTPS_PROXY=http://127.0.0.1:7890
 
 # Runtime
-RUST_LOG=info
-DISABLE_TELEMETRY=1
+# RUST_LOG=info                  # log level (NOT read by this fork — ineffective)
+# DISABLE_TELEMETRY=1            # disable telemetry (NOT read by this fork — telemetry is controlled by settings.json)
 ```
 
 ### Settings Files (priority low → high)
@@ -236,8 +236,8 @@ User and project settings **deep merge**, with project-level keys overriding use
 | `ANTHROPIC_BASE_URL` | API endpoint override | `http://127.0.0.1:1234` |
 | `HTTPS_PROXY` | HTTP proxy | `http://127.0.0.1:7890` |
 | `CLAW_WORKSPACE_POLICY` | Workspace trust policy | `allow` |
-| `RUST_LOG` | Log level | `info` |
-| `DISABLE_TELEMETRY` | Disable telemetry | `1` |
+| `RUST_LOG` | Log level (**not read by this fork — ineffective**) | `info` |
+| `DISABLE_TELEMETRY` | Disable telemetry (**not read by this fork — controlled by settings.json**) | `1` |
 
 ## File Conventions
 
