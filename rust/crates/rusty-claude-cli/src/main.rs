@@ -4566,7 +4566,7 @@ impl HookAbortMonitor {
 // Startup banner: hollow crab-robot icon (outline-only, box-drawing chars).
 // 4 rows, widening to the middle (crab silhouette): 7 / 9 / 11 / 9 cells.
 const BANNER_ICON_LINES: [&str; 4] = [
-    "  ▟▛██▜▙",      // row 0: hollow head (7 cells)
+    "  ▟▛  ▜▙",      // row 0: hollow head (outline-only, matches rows 1-3)
     " ▟▛▜▙▟▛▜▙",     // row 1: head sides (9 cells)
     "▟▛      ▜▙",    // row 2: claws reaching out (11 cells, widest)
     " ▀▀    ▀▀",     // row 3: feet (9 cells)
