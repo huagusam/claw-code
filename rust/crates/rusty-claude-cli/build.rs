@@ -62,9 +62,8 @@ fn main() {
     // ========================================================================
     match ensure_app_icon() {
         Ok(ico_path) => {
-            // Re-embed whenever the SVG, the fallback, or the output path
-            // changes.
-            println!("cargo:rerun-if-changed=assets/fallback/claw-code.ico");
+            // Re-embed whenever the icon file or the output path changes.
+            println!("cargo:rerun-if-changed=assets/icons/claw-code.ico");
 
             // Only embed on Windows targets; the embed_resource crate is a
             // no-op elsewhere but we still avoid the work.
@@ -111,11 +110,11 @@ fn write_icon_rc(ico_path: &Path) -> Result<PathBuf, String> {
 /// Ensures a multi-resolution `claw-code.ico` exists in the build output
 /// directory. Tries to rasterize the SVG via the first available of
 /// `magick`, `resvg`, or `rsvg-convert`. Falls back to the pre-committed
-/// `assets/fallback/claw-code.ico` if the rasterizer is missing or fails.
+/// `assets/icons/claw-code.ico` if the rasterizer is missing or fails.
 fn ensure_app_icon() -> Result<PathBuf, String> {
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").map_err(|e| e.to_string())?);
     let svg = manifest_dir.join("assets").join("icon.svg");
-    let fallback_ico = manifest_dir.join("assets").join("fallback").join("claw-code.ico");
+    let fallback_ico = manifest_dir.join("assets").join("icons").join("claw-code.ico");
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").map_err(|e| e.to_string())?);
     let build_dir = out_dir.join("icon");
