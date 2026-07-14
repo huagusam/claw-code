@@ -1,0 +1,36 @@
+{
+  "agentId": "agent-18c17756ecb5793c-0",
+  "name": "comment-analyzer",
+  "description": "comment-analyzer",
+  "subagentType": "general-purpose",
+  "model": "claude-opus-4-6",
+  "status": "completed",
+  "outputFile": "C:\\Users\\Incredible\\Code\\claw-code\\.claw-agents\\agents\\agent-18c17756ecb5793c-0.md",
+  "manifestFile": "C:\\Users\\Incredible\\Code\\claw-code\\.claw-agents\\agents\\agent-18c17756ecb5793c-0.json",
+  "createdAt": 1783838142,
+  "startedAt": 1783838142,
+  "completedAt": 1783838150,
+  "laneEvents": [
+    {
+      "event": "lane.started",
+      "status": "running",
+      "emittedAt": "1783838142",
+      "metadata": {
+        "seq": 0,
+        "provenance": "live_lane",
+        "timestamp_ms": 1783838142638
+      }
+    },
+    {
+      "event": "lane.finished",
+      "status": "completed",
+      "emittedAt": "1783838150",
+      "metadata": {
+        "seq": 0,
+        "provenance": "live_lane",
+        "timestamp_ms": 1783838150049
+      }
+    }
+  ],
+  "derivedState": "finished_cleanable"
+}

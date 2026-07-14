@@ -1,0 +1,36 @@
+{
+  "agentId": "agent-18c1759687ce2cc4-0",
+  "name": "summary-of-the-user-s-task",
+  "description": "summary of the user's task",
+  "subagentType": "general-purpose",
+  "model": "claude-opus-4-6",
+  "status": "completed",
+  "outputFile": "C:\\Users\\Incredible\\Code\\claw-code\\.claw-agents\\agents\\agent-18c1759687ce2cc4-0.md",
+  "manifestFile": "C:\\Users\\Incredible\\Code\\claw-code\\.claw-agents\\agents\\agent-18c1759687ce2cc4-0.json",
+  "createdAt": 1783836216,
+  "startedAt": 1783836216,
+  "completedAt": 1783836227,
+  "laneEvents": [
+    {
+      "event": "lane.started",
+      "status": "running",
+      "emittedAt": "1783836216",
+      "metadata": {
+        "seq": 0,
+        "provenance": "live_lane",
+        "timestamp_ms": 1783836216800
+      }
+    },
+    {
+      "event": "lane.finished",
+      "status": "completed",
+      "emittedAt": "1783836227",
+      "metadata": {
+        "seq": 0,
+        "provenance": "live_lane",
+        "timestamp_ms": 1783836227026
+      }
+    }
+  ],
+  "derivedState": "finished_cleanable"
+}
