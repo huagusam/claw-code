@@ -320,8 +320,8 @@ const DEPRECATED_FIELDS: &[DeprecatedField] = &[
         replacement: "permissions.defaultMode",
     },
     DeprecatedField {
-        name: "enabledPlugins",
-        replacement: "plugins.enabled",
+        name: "plugins.enabled",
+        replacement: "enabledPlugins",
     },
 ];
 
@@ -445,13 +445,22 @@ pub fn validate_config_file(
     let path_display = file_path.display().to_string();
     let mut result = validate_object_keys(object, TOP_LEVEL_FIELDS, "", source, &path_display);
 
-    // Check deprecated fields.
+    // Check deprecated fields (support dotted paths like "plugins.enabled").
     for deprecated in DEPRECATED_FIELDS {
-        if object.contains_key(deprecated.name) {
+        let (container, search_key) = deprecated.name.split_once('.').map_or(
+            (object, deprecated.name),
+            |(parent, child)| {
+                object
+                    .get(parent)
+                    .and_then(JsonValue::as_object)
+                    .map_or((object, deprecated.name), |nested| (nested, child))
+            },
+        );
+        if container.contains_key(search_key) {
             result.warnings.push(ConfigDiagnostic {
                 path: path_display.clone(),
                 field: deprecated.name.to_string(),
-                line: find_key_line(source, deprecated.name),
+                line: find_key_line(source, search_key),
                 kind: DiagnosticKind::Deprecated {
                     replacement: deprecated.replacement,
                 },
@@ -607,9 +616,9 @@ mod tests {
     }
 
     #[test]
-    fn detects_deprecated_enabled_plugins() {
+    fn detects_deprecated_plugins_enabled() {
         // given
-        let source = r#"{"enabledPlugins": {"tool-guard@builtin": true}}"#;
+        let source = r#"{"plugins": {"enabled": {"tool-guard@builtin": true}}}"#;
         let parsed = JsonValue::parse(source).expect("valid json");
         let object = parsed.as_object().expect("object");
 
@@ -618,11 +627,11 @@ mod tests {
 
         // then
         assert_eq!(result.warnings.len(), 1);
-        assert_eq!(result.warnings[0].field, "enabledPlugins");
+        assert_eq!(result.warnings[0].field, "plugins.enabled");
         assert!(matches!(
             result.warnings[0].kind,
             DiagnosticKind::Deprecated {
-                replacement: "plugins.enabled"
+                replacement: "enabledPlugins"
             }
         ));
     }

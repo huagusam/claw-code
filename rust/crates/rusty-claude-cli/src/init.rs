@@ -2,7 +2,13 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 const GITIGNORE_COMMENT: &str = "# Claw Code local artifacts";
-const GITIGNORE_ENTRIES: [&str; 3] = [".claw/settings.local.json", ".claw/sessions/", ".clawhip/"];
+const GITIGNORE_ENTRIES: [&str; 5] = [
+    ".claw/settings.local.json",
+    ".claw/sessions/",
+    ".clawhip/",
+    ".claude/settings.local.json",
+    ".claude/sessions/",
+];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum InitStatus {
@@ -238,7 +244,8 @@ pub(crate) fn render_init_claude_md(cwd: &Path) -> String {
 
     lines.push("## Working agreement".to_string());
     lines.push("- Prefer small, reviewable changes and keep generated bootstrap files aligned with actual repo workflows.".to_string());
-    lines.push("- Keep shared defaults in `.claw/settings.json`; reserve `.claw/settings.local.json` for machine-local overrides.".to_string());
+    lines.push("- Keep shared defaults in `.claw/settings.json` or `.claude/settings.json`; reserve `.claw/settings.local.json` or `.claude/settings.local.json` for machine-local overrides.".to_string());
+    lines.push("- Claw Code reads `.claude/` config as a fallback for full claude-code compatibility — you can use either directory.".to_string());
     lines.push("- Do not overwrite existing `CLAUDE.md` content automatically; update it intentionally when repo workflows change.".to_string());
     lines.push(String::new());
 
@@ -393,9 +400,12 @@ mod tests {
         assert!(gitignore.contains(".claw/settings.local.json"));
         assert!(gitignore.contains(".claw/sessions/"));
         assert!(gitignore.contains(".clawhip/"));
+        assert!(gitignore.contains(".claude/settings.local.json"));
+        assert!(gitignore.contains(".claude/sessions/"));
         let claude_md = fs::read_to_string(root.join("CLAUDE.md")).expect("read claude md");
         assert!(claude_md.contains("Languages: Rust."));
         assert!(claude_md.contains("cargo clippy --workspace --all-targets -- -D warnings"));
+        assert!(claude_md.contains(".claude/") || claude_md.contains("claude-code compatibility"));
 
         fs::remove_dir_all(root).expect("cleanup temp dir");
     }
@@ -425,6 +435,8 @@ mod tests {
         assert_eq!(gitignore.matches(".claw/settings.local.json").count(), 1);
         assert_eq!(gitignore.matches(".claw/sessions/").count(), 1);
         assert_eq!(gitignore.matches(".clawhip/").count(), 1);
+        assert_eq!(gitignore.matches(".claude/settings.local.json").count(), 1);
+        assert_eq!(gitignore.matches(".claude/sessions/").count(), 1);
 
         fs::remove_dir_all(root).expect("cleanup temp dir");
     }
@@ -501,6 +513,7 @@ mod tests {
         assert!(rendered.contains("Frameworks/tooling markers: Next.js, React."));
         assert!(rendered.contains("pyproject.toml"));
         assert!(rendered.contains("Next.js detected"));
+        assert!(rendered.contains(".claude/") || rendered.contains("claude-code compatibility"));
 
         fs::remove_dir_all(root).expect("cleanup temp dir");
     }

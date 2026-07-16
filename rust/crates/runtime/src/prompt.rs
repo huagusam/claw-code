@@ -215,12 +215,35 @@ fn discover_instruction_files(cwd: &Path) -> std::io::Result<Vec<ContextFile>> {
             dir.join("CLAUDE.md"),
             dir.join("CLAUDE.local.md"),
             dir.join(".claw").join("CLAUDE.md"),
-            dir.join(".claw").join("instructions.md"),
+            dir.join(".claude").join("CLAUDE.md"),
         ] {
             push_context_file(&mut files, candidate)?;
         }
+        push_rules_files(&mut files, dir.join(".claw").join("rules"))?;
+        push_rules_files(&mut files, dir.join(".claude").join("rules"))?;
     }
     Ok(dedupe_instruction_files(files))
+}
+
+fn push_rules_files(files: &mut Vec<ContextFile>, rules_dir: PathBuf) -> std::io::Result<()> {
+    if !rules_dir.is_dir() {
+        return Ok(());
+    }
+    match fs::read_dir(&rules_dir) {
+        Ok(entries) => {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.is_dir() {
+                    push_rules_files(files, path)?;
+                } else if path.extension().is_some_and(|ext| ext == "md") {
+                    push_context_file(files, path)?;
+                }
+            }
+            Ok(())
+        }
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(e) => Err(e),
+    }
 }
 
 fn push_context_file(files: &mut Vec<ContextFile>, path: PathBuf) -> std::io::Result<()> {
@@ -556,17 +579,12 @@ mod tests {
         fs::write(root.join("apps").join("CLAUDE.md"), "apps instructions")
             .expect("write apps instructions");
         fs::write(
-            root.join("apps").join(".claw").join("instructions.md"),
-            "apps dot claude instructions",
+            root.join("apps").join(".claw").join("CLAUDE.md"),
+            "apps claw claude md",
         )
-        .expect("write apps dot claude instructions");
-        fs::write(nested.join(".claw").join("CLAUDE.md"), "nested rules")
-            .expect("write nested rules");
-        fs::write(
-            nested.join(".claw").join("instructions.md"),
-            "nested instructions",
-        )
-        .expect("write nested instructions");
+        .expect("write apps claw claude md");
+        fs::write(nested.join(".claw").join("CLAUDE.md"), "nested claw claude md")
+            .expect("write nested claw claude md");
 
         let context = ProjectContext::discover(&nested, "2026-03-31").expect("context should load");
         let contents = context
@@ -581,11 +599,73 @@ mod tests {
                 "root instructions",
                 "local instructions",
                 "apps instructions",
-                "apps dot claude instructions",
-                "nested rules",
-                "nested instructions"
+                "apps claw claude md",
+                "nested claw claude md",
             ]
         );
+        fs::remove_dir_all(root).expect("cleanup temp dir");
+    }
+
+    #[test]
+    fn discovers_claw_and_claude_rules_recursively() {
+        let root = temp_dir();
+        let nested = root.join("sub").join("project");
+        fs::create_dir_all(nested.join(".claude").join("rules").join("subdir")).expect("rules dir");
+        fs::create_dir_all(nested.join(".claw").join("rules")).expect("claw rules dir");
+        fs::write(
+            nested.join(".claude").join("CLAUDE.md"),
+            "dot claude instructions",
+        )
+        .expect("write dot claude instructions");
+        fs::write(
+            nested.join(".claw").join("CLAUDE.md"),
+            "dot claw instructions",
+        )
+        .expect("write dot claw instructions");
+        fs::write(
+            nested.join(".claude").join("rules").join("react.md"),
+            "# React rules\nAlways use hooks",
+        )
+        .expect("write react rule");
+        fs::write(
+            nested.join(".claude").join("rules").join("subdir").join("deep.md"),
+            "deep rule in subdir",
+        )
+        .expect("write deep rule");
+        fs::write(
+            nested.join(".claw").join("rules").join("claw-style.md"),
+            "claw style rule",
+        )
+        .expect("write claw style rule");
+
+        let context = ProjectContext::discover(&nested, "2026-03-31").expect("context should load");
+        let contents: Vec<&str> = context
+            .instruction_files
+            .iter()
+            .map(|file| file.content.as_str())
+            .collect();
+
+        assert!(
+            contents.contains(&"dot claude instructions"),
+            "should discover .claude/CLAUDE.md"
+        );
+        assert!(
+            contents.contains(&"dot claw instructions"),
+            "should discover .claw/CLAUDE.md"
+        );
+        assert!(
+            contents.iter().any(|c| c.contains("# React rules")),
+            "should discover .claude/rules/*.md"
+        );
+        assert!(
+            contents.contains(&"deep rule in subdir"),
+            "should discover rules recursively in subdirs"
+        );
+        assert!(
+            contents.contains(&"claw style rule"),
+                       "should discover .claw/rules/*.md"
+        );
+
         fs::remove_dir_all(root).expect("cleanup temp dir");
     }
 
@@ -865,23 +945,23 @@ mod tests {
     }
 
     #[test]
-    fn discovers_dot_claude_instructions_markdown() {
+    fn discovers_claw_rules_markdown() {
         let root = temp_dir();
         let nested = root.join("apps").join("api");
-        fs::create_dir_all(nested.join(".claw")).expect("nested claw dir");
+        fs::create_dir_all(nested.join(".claw").join("rules")).expect("nested claw rules dir");
         fs::write(
-            nested.join(".claw").join("instructions.md"),
-            "instruction markdown",
+            nested.join(".claw").join("rules").join("lint.md"),
+            "lint rules",
         )
-        .expect("write instructions.md");
+        .expect("write lint.md");
 
         let context = ProjectContext::discover(&nested, "2026-03-31").expect("context should load");
         assert!(context
             .instruction_files
             .iter()
-            .any(|file| file.path.ends_with(".claw/instructions.md")));
+            .any(|file| file.path.ends_with("lint.md")));
         assert!(
-            render_instruction_files(&context.instruction_files).contains("instruction markdown")
+            render_instruction_files(&context.instruction_files).contains("lint rules")
         );
 
         fs::remove_dir_all(root).expect("cleanup temp dir");

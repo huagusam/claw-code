@@ -411,9 +411,9 @@ If `new_string` is shorter than `old_string`, confirm you are intentionally remo
             input_schema: json!({
                 "type": "object",
                 "properties": {
-                    "duration_ms": { "type": "integer", "minimum": 0 }
+                    "durationMs": { "type": "integer", "minimum": 0 }
                 },
-                "required": ["duration_ms"],
+                "required": ["durationMs"],
                 "additionalProperties": false
             }),
             required_permission: PermissionMode::ReadOnly,
@@ -429,12 +429,8 @@ If `new_string` is shorter than `old_string`, confirm you are intentionally remo
                         "type": "array",
                         "items": { "type": "string" }
                     },
-                    "status": {
-                        "type": "string",
-                        "enum": ["normal", "proactive"]
-                    }
                 },
-                "required": ["message", "status"],
+                "required": ["message"],
                 "additionalProperties": false
             }),
             required_permission: PermissionMode::ReadOnly,

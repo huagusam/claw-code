@@ -4,12 +4,9 @@ use std::path::{Path, PathBuf};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum DefinitionSource {
     ProjectClaw,
-    ProjectCodex,
     ProjectClaude,
     UserClawConfigHome,
-    UserCodexHome,
     UserClaw,
-    UserCodex,
     UserClaude,
     Plugin,
 }
@@ -36,11 +33,11 @@ impl DefinitionScope {
 impl DefinitionSource {
     pub fn report_scope(self) -> DefinitionScope {
         match self {
-            Self::ProjectClaw | Self::ProjectCodex | Self::ProjectClaude => {
+            Self::ProjectClaw | Self::ProjectClaude => {
                 DefinitionScope::Project
             }
-            Self::UserClawConfigHome | Self::UserCodexHome => DefinitionScope::UserConfigHome,
-            Self::UserClaw | Self::UserCodex | Self::UserClaude => DefinitionScope::UserHome,
+            Self::UserClawConfigHome => DefinitionScope::UserConfigHome,
+            Self::UserClaw | Self::UserClaude => DefinitionScope::UserHome,
             Self::Plugin => DefinitionScope::Plugin,
         }
     }
@@ -154,16 +151,11 @@ fn discover_definition_roots(cwd: &Path, leaf: &str) -> Vec<(DefinitionSource, P
 
     for ancestor in cwd.ancestors() {
         push_unique_root(&mut roots, DefinitionSource::ProjectClaw, ancestor.join(".claw").join(leaf));
-        push_unique_root(&mut roots, DefinitionSource::ProjectCodex, ancestor.join(".codex").join(leaf));
         push_unique_root(&mut roots, DefinitionSource::ProjectClaude, ancestor.join(".claude").join(leaf));
     }
 
     if let Ok(claw_config_home) = std::env::var("CLAW_CONFIG_HOME") {
         push_unique_root(&mut roots, DefinitionSource::UserClawConfigHome, PathBuf::from(claw_config_home).join(leaf));
-    }
-
-    if let Ok(codex_home) = std::env::var("CODEX_HOME") {
-        push_unique_root(&mut roots, DefinitionSource::UserCodexHome, PathBuf::from(codex_home).join(leaf));
     }
 
     if let Ok(claude_config_dir) = std::env::var("CLAUDE_CONFIG_DIR") {
@@ -175,7 +167,6 @@ fn discover_definition_roots(cwd: &Path, leaf: &str) -> Vec<(DefinitionSource, P
         .map(PathBuf::from);
     if let Some(home) = home {
         push_unique_root(&mut roots, DefinitionSource::UserClaw, home.join(".claw").join(leaf));
-        push_unique_root(&mut roots, DefinitionSource::UserCodex, home.join(".codex").join(leaf));
         push_unique_root(&mut roots, DefinitionSource::UserClaude, home.join(".claude").join(leaf));
     }
 
@@ -400,15 +391,9 @@ pub fn render_agents_report_json(
 
 pub fn definition_source_id(source: DefinitionSource) -> &'static str {
     match source {
-        DefinitionSource::ProjectClaw
-        | DefinitionSource::ProjectCodex
-        | DefinitionSource::ProjectClaude => "project_claw",
-        DefinitionSource::UserClawConfigHome | DefinitionSource::UserCodexHome => {
-            "user_claw_config_home"
-        }
-        DefinitionSource::UserClaw | DefinitionSource::UserCodex | DefinitionSource::UserClaude => {
-            "user_claw"
-        }
+        DefinitionSource::ProjectClaw | DefinitionSource::ProjectClaude => "project_claw",
+        DefinitionSource::UserClawConfigHome => "user_claw_config_home",
+        DefinitionSource::UserClaw | DefinitionSource::UserClaude => "user_claw",
         DefinitionSource::Plugin => "plugin",
     }
 }

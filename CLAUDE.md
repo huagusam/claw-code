@@ -51,6 +51,6 @@ Adapt structure to the domain: state diagnosis before solution; include trade-of
 - Enter MinGW-w64 Bash with: `bash` (from PowerShell)
 
 ### Browser Automation
-- Use `browser-harness read` for reading web pages (see `real_tool\browser-harness\browser-harness-use.md`)
-- Use `chrome-devtools-mcp` skill for browsing, restricted sites, debugging, network analysis, performance audits
+- `browser-harness` is an independent CLI tool. Use `browser-harness read` for reading web pages (see `real_tool\browser-harness\browser-harness-use.md`)
+- `chrome-devtools-mcp` is an MCP server. Use `chrome-devtools-mcp` skill for browsing, restricted sites, debugging, network analysis, performance audits
 

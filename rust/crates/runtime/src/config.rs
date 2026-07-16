@@ -831,6 +831,17 @@ fn parse_optional_plugin_config(root: &JsonValue) -> Result<RuntimePluginConfig,
     };
 
     let mut config = RuntimePluginConfig::default();
+
+    // enabledPlugins is the canonical field (matches claude-code CLI schema).
+    // plugins.enabled is deprecated but still parsed as a fallback.
+    if let Some(enabled_value) = object
+        .get("plugins")
+        .and_then(JsonValue::as_object)
+        .and_then(|p| p.get("enabled"))
+    {
+        config.enabled_plugins =
+            parse_bool_map(enabled_value, "merged settings.plugins.enabled")?;
+    }
     if let Some(enabled_plugins) = object.get("enabledPlugins") {
         config.enabled_plugins = parse_bool_map(enabled_plugins, "merged settings.enabledPlugins")?;
     }
@@ -840,9 +851,6 @@ fn parse_optional_plugin_config(root: &JsonValue) -> Result<RuntimePluginConfig,
     };
     let plugins = expect_object(plugins_value, "merged settings.plugins")?;
 
-    if let Some(enabled_value) = plugins.get("enabled") {
-        config.enabled_plugins = parse_bool_map(enabled_value, "merged settings.plugins.enabled")?;
-    }
     config.external_directories =
         optional_string_array(plugins, "externalDirectories", "merged settings.plugins")?
             .unwrap_or_default();
@@ -887,7 +895,7 @@ fn parse_permission_mode_label(
     match mode {
         "default" | "plan" | "read-only" => Ok(ResolvedPermissionMode::ReadOnly),
         "acceptEdits" | "auto" | "workspace-write" => Ok(ResolvedPermissionMode::WorkspaceWrite),
-        "dontAsk" | "danger-full-access" => Ok(ResolvedPermissionMode::DangerFullAccess),
+        "dontAsk" | "bypassPermissions" | "danger-full-access" => Ok(ResolvedPermissionMode::DangerFullAccess),
         other => Err(ConfigError::Parse(format!(
             "{context}: unsupported permission mode {other}"
         ))),
@@ -2004,6 +2012,11 @@ mod tests {
         );
         assert_eq!(
             parse_permission_mode_label("dontAsk", "test").expect("dontAsk should resolve"),
+            ResolvedPermissionMode::DangerFullAccess
+        );
+        assert_eq!(
+            parse_permission_mode_label("bypassPermissions", "test")
+                .expect("bypassPermissions should resolve"),
             ResolvedPermissionMode::DangerFullAccess
         );
     }
